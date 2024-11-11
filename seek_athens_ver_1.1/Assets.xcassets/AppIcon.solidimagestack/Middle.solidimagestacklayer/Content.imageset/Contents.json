@@ -1,0 +1,13 @@
+{
+  "images" : [
+    {
+      "filename" : "seek-uga-primary-white-small.png",
+      "idiom" : "vision",
+      "scale" : "2x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
