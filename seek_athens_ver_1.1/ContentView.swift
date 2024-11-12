@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVKit
 import RealityKit
 
 struct ContentView: View {
@@ -15,60 +16,94 @@ struct ContentView: View {
     //Environment Propery Wrapper for closing a ImmersiveSpace
     @Environment(\.dismissImmersiveSpace) private var dismissImmersiveSpace
     
-    //Boolean to check if app has been entered
-    @State private var started: Bool = false
+    //String to track app screen
+    @State private var screen: String = "startup"
     
     //Boolean to check if an experience is active
     @State private var inExp: Bool = false
     
     //String to store current experience description
     @State private var curTitle: String = ""
-    @State private var curDesc: String = ""
+    
+    //AVPlayer to store current video clip
+    @State var player = AVPlayer(url: Bundle.main.url(forResource: "intro", withExtension: "mov")!) //
     
     var body: some View {
-        if !started {//Still on startup screen
-            //background(Color.georgiaClay.ignoresSafeArea())
+        if screen == "startup" {
             
+            //Still on startup screen
             VStack() {
                 Image("logo-large")
-                    .resizable()
-                    .controlSize(.large)
-                    .aspectRatio(contentMode: .fit)
-                //Button to enter the app
-                Button("Enter") {
+                 .resizable()
+                 .controlSize(.small)
+                 .aspectRatio(contentMode: .fit)
+                 
+                //Button to begin the app
+                Button("Begin") {
                     Task {
-                        started = true
+                        screen = "intro"
                     }
                 }
-                .padding(20)
+                .padding(.all, 10)
             }
-        } else { //Clicked through startup screen
+            
+        } else if screen == "intro" {
+            
+            //VideoPlayer for the startup message
+            VideoPlayer(player: player, videoOverlay: {
+               VStack(alignment: .center) {
+                   Text("Introduction")
+                       .foregroundColor(Color.gray)
+                       .font(.title)
+                       .padding(.all, 10)
+                   
+                   Spacer()
+                   
+                   //Button to enter the app
+                   Button("View Experiences") {
+                       Task {
+                           screen = "hub"
+                       }
+                   }
+                   .padding(.all, 10)
+               }
+            })
+            .frame(width: 1280, height: 720, alignment: .center)
+            .onAppear() {
+                player.play()
+            }
+               
+            
+        } else if screen == "hub"{ //Clicked through startup screen
             //background(Color.hairyGrey.ignoresSafeArea())
             
             if inExp {
-                VStack() {
-                    //Title of the current experience (welcome msg)
-                    Text(curTitle)
-                        .font(.title)
-                        .padding()
-                    
-                    //Text explaining the current experience
-                    Text(curDesc)
-                        .font(.subheadline)
-                        .padding(20)
-                        .frame(width:800)
-                    
-                    //Button to leave current experinece
-                    Button("Leave Experience") {
-                        Task {
-                            await dismissImmersiveSpace()
-                            inExp = false
-                            curTitle = ""
-                            curDesc = ""
-                        }
-                    }
+                VideoPlayer(player: player, videoOverlay: {
+                   VStack(alignment: .center) {
+                       //Title of the current experience (welcome msg)
+                       Text(curTitle)
+                           .foregroundColor(Color.gray)
+                           .font(.title)
+                           .padding(.all, 10)
+                       
+                       Spacer()
+                       
+                       //Button to leave current experinece
+                       Button("Leave Experience") {
+                           Task {
+                               await dismissImmersiveSpace()
+                               inExp = false
+                               curTitle = ""
+                           }
+                       }
+                       .padding(.all, 10)
+                   }
+                })
+                .frame(width: 1280, height: 720, alignment: .center)
+                .onAppear() {
+                    player.play()
                 }
-                .padding()
+                    
             } else {
                 HStack() {
                     VStack() {
@@ -79,7 +114,7 @@ struct ContentView: View {
                                     await openImmersiveSpace(id: "ArchPlayer360")
                                     inExp = true
                                     curTitle = "Welcome to the Arch!"
-                                    curDesc = "The Arch description."
+                                    player = AVPlayer(url: Bundle.main.url(forResource: "arch", withExtension: "mov")!)
                                 }
                             } label: {
                                 Image("arch")
@@ -89,11 +124,11 @@ struct ContentView: View {
                             .controlSize(.regular)
                             .buttonStyle(.plain)
                             .buttonBorderShape(.circle)
-                            .padding(20)
+                            .padding(.all, 10)
                             
                             Text("The Arch")
                                 .font(.subheadline)
-                                .padding(20)
+                                .padding(.all, 10)
                         }
                         
                         
@@ -104,7 +139,7 @@ struct ContentView: View {
                                     await openImmersiveSpace(id: "BoltonPlayer360")
                                     inExp = true
                                     curTitle = "Welcome to the Bolton Dining Hall!"
-                                    curDesc = "Bolton Description."
+                                    player = AVPlayer(url: Bundle.main.url(forResource: "bolton", withExtension: "mov")!)
                                 }
                             } label: {
                                 Image("bolton")
@@ -115,11 +150,11 @@ struct ContentView: View {
                             .controlSize(.regular)
                             .buttonStyle(.plain)
                             .buttonBorderShape(.circle)
-                            .padding(20)
+                            .padding(.all, 10)
                             
                             Text("Bolton Dining Hall")
                                 .font(.subheadline)
-                                .padding(20)
+                                .padding(.all, 10)
                         }
                     }
                     VStack() {
@@ -130,7 +165,7 @@ struct ContentView: View {
                                     await openImmersiveSpace(id: "TatePlayer360")
                                     inExp = true
                                     curTitle = "Welcome to the Tate Student Center!"
-                                    curDesc = "The Tate Student Center is a central hub designed specifically for students, serving as the perfect gathering place for study groups, lunch breaks, and movie nights. With a variety of dining options—including Chick-fil-A, Panda Express, Starbucks, Barberitos, and the Market at Tate—students and faculty can always find delicious meals and snacks to keep them energized throughout the day. The center’s welcoming atmosphere encourages social interaction and collaboration, making it an essential part of campus life."
+                                    player = AVPlayer(url: Bundle.main.url(forResource: "tate", withExtension: "mov")!)
                                 }
                             } label: {
                                 Image("tate")
@@ -140,11 +175,11 @@ struct ContentView: View {
                             .controlSize(.regular)
                             .buttonStyle(.plain)
                             .buttonBorderShape(.circle)
-                            .padding(20)
+                            .padding(.all, 10)
                             
                             Text("The Tate Center")
                                 .font(.subheadline)
-                                .padding(20)
+                                .padding(.all, 10)
                         }
                         
                         
@@ -155,7 +190,7 @@ struct ContentView: View {
                                     await openImmersiveSpace(id: "SanfordPlayer360")
                                     inExp = true
                                     curTitle = "Welcome to Sanford Stadium!"
-                                    curDesc = "Sanford Stadium is home of the 2021-2022 Back-To-Back National Champions and a historic football venue known for its vibrant atmosphere and passionate Bulldog fans. With a capacity of approximately 93,033, it is one of the largest stadiums in the country. Dooley Field, named after the winningest football coach in Georgia history, is famously situated “between the hedges,” a cherished feature that adds to the stadium’s charm."
+                                    player = AVPlayer(url: Bundle.main.url(forResource: "sanford", withExtension: "mov")!)
                                 }
                             } label: {
                                 Image("sanford")
@@ -166,11 +201,11 @@ struct ContentView: View {
                             .controlSize(.regular)
                             .buttonStyle(.plain)
                             .buttonBorderShape(.circle)
-                            .padding(20)
+                            .padding(.all, 10)
                             
                             Text("Sanford Stadium")
                                 .font(.subheadline)
-                                .padding(20)
+                                .padding(.all, 10)
                         }
                     }
                     VStack() {
@@ -181,7 +216,7 @@ struct ContentView: View {
                                     await openImmersiveSpace(id: "MLCPlayer360")
                                     inExp = true
                                     curTitle = "Welcome to the Miller Learning Center!"
-                                    curDesc = "The Miller Learning Center, affectionately known as the MLC, serves as a collaborative workspace for students. With 96 study rooms available—both private and communal—it's an ideal environment for focused learning and group projects. The center also features spacious lecture halls and classrooms designed to facilitate engaging educational experiences. Additionally it is home to the on-campus Jittery Joe’s, which remains open until 10 p.m., offering the perfect spot for a coffee break or study session."
+                                    player = AVPlayer(url: Bundle.main.url(forResource: "mlc", withExtension: "mov")!)
                                 }
                             } label: {
                                 Image("mlc")
@@ -192,11 +227,11 @@ struct ContentView: View {
                             .controlSize(.regular)
                             .buttonStyle(.plain)
                             .buttonBorderShape(.circle)
-                            .padding(20)
+                            .padding(.all, 10)
                             
                             Text("The MLC")
                                 .font(.subheadline)
-                                .padding(20)
+                                .padding(.all, 10)
                         }
                         
                         VStack() {
@@ -206,7 +241,7 @@ struct ContentView: View {
                                     await openImmersiveSpace(id: "BrumbyPlayer360")
                                     inExp = true
                                     curTitle = "Welcome to Brumby Hall!"
-                                    curDesc = "Brumby Hall stands as one of three prominent high-rise freshmen dorms on the University of Georgia campus. Featuring a total of 30 dormitory suites, Brumby Hall is home to the iconic rotunda, a welcoming space where students can study or connect with friends. With nine floors accommodating 940 freshmen, this residence fosters a lively community and offers a vibrant environment for new students to thrive as they embark on their college journey."
+                                    player = AVPlayer(url: Bundle.main.url(forResource: "brumby", withExtension: "mov")!)
                                 }
                             } label: {
                                 Image("brumby")
@@ -216,11 +251,11 @@ struct ContentView: View {
                             .controlSize(.regular)
                             .buttonStyle(.plain)
                             .buttonBorderShape(.circle)
-                            .padding(20)
+                            .padding(.all, 10)
                             
                             Text("Brumby Hall")
                                 .font(.subheadline)
-                                .padding(20)
+                                .padding(.all, 10)
                         }
                     }
                 }
@@ -228,26 +263,3 @@ struct ContentView: View {
         }
     }
 }
-
-/*#Preview {
-    VStack() {
-        //Title of the current experience (welcome msg)
-        Text("Welcome to Sanford Stadium!")
-            .font(.title)
-            .padding(20)
-        
-        //Text explaining the current experience
-        Text("Sanford Stadium is home of the 2021-2022 Back-To-Back National Champions and a historic football venue known for its vibrant atmosphere and passionate Bulldog fans. With a capacity of approximately 93,033, it is one of the largest stadiums in the country. Dooley Field, named after the winningest football coach in Georgia history, is famously situated “between the hedges,” a cherished feature that adds to the")
-            .font(.subheadline)
-            .padding(20)
-        
-        //Button to leave current experinece
-        Button("Leave Experience") {
-            Task {
-                "stinky"
-            }
-        }
-        .padding(20)
-    }
-    .padding()
-}*/

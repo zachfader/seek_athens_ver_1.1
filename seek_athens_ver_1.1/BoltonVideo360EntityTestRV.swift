@@ -21,7 +21,7 @@ struct BoltonVideo360EntityTestRV: View {
             let videoEntity = Entity()
 
             //Search for video in paths
-            guard let url = Bundle.main.url(forResource: "Bolton", withExtension: "mp4") else {fatalError("Video was not found!")}
+            guard let url = Bundle.main.url(forResource: "bolton", withExtension: "mp4") else {fatalError("Video was not found!")}
             
             //create a simple AVPlayer
             let asset = AVURLAsset(url: url)

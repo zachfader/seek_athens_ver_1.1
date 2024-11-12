@@ -1,5 +1,5 @@
 //
-//  ArchVideo360EntityTestRV.swift
+//  BoltonVideo360EntityTestRV.swift
 //  seek_athens_ver_1.1
 //
 //  Created by Zach Fader on 11/11/24.
